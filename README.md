@@ -2,6 +2,15 @@
 
 Small Python experiments for reading FF14 network data.
 
+## Upstream References
+
+This repo is glue code and local experiments around several upstream projects. It is not a clean-room implementation of every component used here.
+
+- `tools/MachinaBridge` depends on `Machina` and `Machina.FFXIV` for FF14 network decoding.
+- `tools/third_party/deucalion` holds the Deucalion DLL used for the direct pipe workflow.
+- `tools/ActPluginPatch` patches a built `FFXIV_ACT_Plugin.dll` copy by rewriting its embedded opcode table; it does not rebuild the ACT plugin from source.
+- `data/reference/FFXIV_ACT_Plugin.dll_Decompiled` is kept as reference material for investigating the plugin bundle layout and embedded opcode resources.
+
 ## Step 1: raw TCP payload capture
 
 The first script only captures raw TCP payload bytes for the running
