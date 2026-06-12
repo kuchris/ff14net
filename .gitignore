@@ -15,6 +15,3 @@ captures/
 # .NET build outputs
 bin/
 obj/
-
-# Downloaded third-party binaries/releases
-tools/third_party/
