@@ -8,7 +8,7 @@ $taskSource = Join-Path $taskRoot 'tools\third_party\FFXIV_ACT_Plugin_3.0.3.3'
 $taskOutput = Join-Path $taskRoot 'tools\third_party\patch'
 $taskStage = Join-Path $taskRoot 'build\20261020-recv-fix'
 $taskProject = Join-Path $taskRoot 'tools\ActPluginPatch\ActPluginPatch.csproj'
-$taskOpcodes = Join-Path $taskRoot 'data\act_global_opcodes.txt'
+$taskOpcodes = Join-Path $taskRoot 'data\opcodes\global\7.57_2026.10.16.txt'
 
 # These are observed local inputs, not a claim of official release provenance.
 $taskInputs = @{

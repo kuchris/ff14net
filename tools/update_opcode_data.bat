@@ -7,7 +7,7 @@ for %%I in ("%ROOT%") do set "ROOT=%%~fI"
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference = 'Stop';" ^
   "$root = $env:ROOT;" ^
-  "$dataDir = Join-Path $root 'data';" ^
+  "$dataDir = Join-Path $root 'data\opcodes';" ^
   "$opcodesPath = Join-Path $dataDir 'opcodes.json';" ^
   "$actPath = Join-Path $dataDir 'act_global_opcodes.txt';" ^
   "$xivalexPath = Join-Path $dataDir 'xivalex_global_opcodes.json';" ^

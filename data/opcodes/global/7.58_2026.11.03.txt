@@ -1,0 +1,28 @@
+# Global 7.58, game build 2026.11.03.0000.0000
+# Source: community, received 2026-11-10. Not verified against live packets.
+StatusEffectList|15d
+StatusEffectList2|a4
+StatusEffectList3|35d
+BossStatusEffectList|320
+StatusEffectListForay3|178
+Ability1|190
+Ability8|233
+Ability16|119
+Ability24|39c
+Ability32|dd
+ActorCast|160
+EffectResult|293
+EffectResultBasic|24a
+ActorControl|2df
+ActorControlSelf|a9
+ActorControlTarget|100
+UpdateHpMpTp|3ac
+PlayerSpawn|2fc
+NpcSpawn|176
+NpcSpawn2|2fd
+ActorMove|ae
+ActorSetPos|3a6
+ActorGauge|323
+PresetWaymark|177
+Waymark|e9
+SystemLogMessage|1de

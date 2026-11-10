@@ -6,7 +6,7 @@ for %%I in ("%ROOT%") do set "ROOT=%%~fI"
 
 set "PROJECT=%ROOT%\tools\ActPluginPatch\ActPluginPatch.csproj"
 set "PLUGIN_ROOT=%ROOT%\tools\third_party"
-set "OPCODE_FILE=%ROOT%\data\act_global_opcodes.txt"
+set "OPCODE_FILE=%ROOT%\data\opcodes\act_global_opcodes.txt"
 set "REGION=Global"
 
 for /f "usebackq delims=" %%I in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$root = $env:PLUGIN_ROOT; if (!(Test-Path -LiteralPath $root)) { exit 0 }; Get-ChildItem -LiteralPath $root -Directory -Filter 'FFXIV_ACT_Plugin_*' | ForEach-Object { $versionText = $_.Name.Substring('FFXIV_ACT_Plugin_'.Length); try { [pscustomobject]@{ Version = [version]$versionText; Path = $_.FullName } } catch {} } | Where-Object { Test-Path -LiteralPath (Join-Path $_.Path 'FFXIV_ACT_Plugin.dll') } | Sort-Object Version -Descending | Select-Object -First 1 -ExpandProperty Path"`) do set "PLUGIN_DIR=%%I"

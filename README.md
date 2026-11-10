@@ -10,7 +10,7 @@ scripts/            Python tools (run from the repo root with uv)
   capture_tcp.py      raw TCP payload capture through WinDivert
   analyze_capture.py  inspect raw TCP captures
   deucalion_client.py read the Deucalion named pipe into JSONL
-  analyze_deucalion.py decode captured Zone IPC with data/opcodes.json
+  analyze_deucalion.py decode captured Zone IPC with data/opcodes/opcodes.json
   watch_casts.py      live cast-start viewer
   deucalion_probe.py  short Deucalion health check (RECV ON/OFF, packet count)
 tools/
@@ -21,7 +21,10 @@ tools/
   patch_act_plugin.cmd           opcode-only ACT patch (see warning below)
   update_opcode_data.bat         download upstream opcode tables
   third_party/        ACT plugin inputs and the prepared bundle in patch/
-data/               opcode tables, actions.csv, decompiled ACT plugin reference
+data/
+  opcodes/          active opcode tables; global/ keeps one file per game build
+  actions.csv       action ID -> name
+  reference/        decompiled ACT plugin reference
 docs/               dated repair notes and the 7.57 technical report
 build/, captures/   local outputs (git-ignored)
 ```
@@ -41,12 +44,18 @@ that has not been extracted, patched or tested yet.
 
 ## Opcode data
 
+All opcode files live in `data/opcodes/`; see
+[data/opcodes/README.md](data/opcodes/README.md) for the full table list.
+
 | File | Contents |
 | --- | --- |
-| `data/opcodes.json` | Upstream-format table for the Python readers |
-| `data/act_global_opcodes.txt` | Global table with ACT names, `Name\|hex` |
-| `data/xivalex_global_opcodes.json` | Global XivAlexander server values |
+| `opcodes.json` | Upstream-format table for the Python readers |
+| `act_global_opcodes.txt` | Active Global table with ACT names, `Name\|hex` |
+| `xivalex_global_opcodes.json` | Global XivAlexander server values |
+| `global/<patch>_<build>.txt` | Every Global table received, one per game build |
 
+- **Global 7.58** (`2026.11.03`): community table stored in
+  `global/7.58_2026.11.03.txt`; not active and not tested yet.
 - **Global 7.57**: only the 26 server Zone opcodes supplied by the user on
   2026-10-20 (replacing the 2026-10-13 mappings). Other Global messages are
   unknown. The values match the ACT DLL, but packet layouts have not been

@@ -1,0 +1,29 @@
+# Global 7.57, game build 2026.10.16.0000.0000
+# Source: supplied by the user on 2026-10-20. Used by tools/repair_deucalion_20261020.ps1.
+StatusEffectList|D4
+StatusEffectList2|387
+StatusEffectList3|28E
+BossStatusEffectList|14C
+StatusEffectListForay3|2D0
+Ability1|363
+Ability8|262
+Ability16|299
+Ability24|245
+Ability32|385
+ActorCast|7F
+EffectResult|32C
+EffectResultBasic|EB
+ActorControl|229
+ActorControlSelf|101
+ActorControlTarget|22B
+UpdateHpMpTp|2A4
+PlayerSpawn|17C
+NpcSpawn|17D
+NpcSpawn2|1AB
+ActorMove|136
+ActorSetPos|66
+ActorGauge|326
+PresetWaymark|35E
+Waymark|3DA
+SystemLogMessage|250
+

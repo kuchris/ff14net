@@ -173,7 +173,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze Deucalion IPC payload JSONL.")
     parser.add_argument("path", nargs="?", default="captures/deucalion_payloads.jsonl")
     parser.add_argument("--limit", type=int, default=25)
-    parser.add_argument("--opcodes", default="data/opcodes.json", type=Path)
+    parser.add_argument("--opcodes", default="data/opcodes/opcodes.json", type=Path)
     parser.add_argument("--actions", default="data/actions.csv", type=Path)
     parser.add_argument("--region", default="Global")
     parser.add_argument("--opcode", type=parse_opcode, help="Only show one opcode, e.g. 0x0345.")

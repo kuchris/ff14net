@@ -9,7 +9,7 @@ This helper does **not** rebuild the ACT plugin from source. It rewrites the bun
 - [Program.cs](./Program.cs): patcher implementation
 - [ActPluginPatch.csproj](./ActPluginPatch.csproj): helper project
 - [../patch_act_plugin.cmd](../patch_act_plugin.cmd): wrapper command
-- [../../data/act_global_opcodes.txt](../../data/act_global_opcodes.txt): default Global opcode table input
+- [../../data/opcodes/act_global_opcodes.txt](../../data/opcodes/act_global_opcodes.txt): default Global opcode table input
 
 ## What It Patches
 
@@ -29,7 +29,7 @@ Region names accepted by the tool:
 
 ## Default Workflow
 
-1. Edit [../../data/act_global_opcodes.txt](../../data/act_global_opcodes.txt).
+1. Edit [../../data/opcodes/act_global_opcodes.txt](../../data/opcodes/act_global_opcodes.txt).
 2. Run the wrapper:
 
 ```cmd
@@ -88,7 +88,7 @@ tools\patch_act_plugin.cmd [opcode-file] [output-dll] [region]
 Example:
 
 ```cmd
-tools\patch_act_plugin.cmd data\act_global_opcodes.txt build\FFXIV_ACT_Plugin.test.dll Global
+tools\patch_act_plugin.cmd data\opcodes\global\7.58_2026.11.03.txt build\FFXIV_ACT_Plugin.test.dll Global
 ```
 
 ## Direct Tool Usage

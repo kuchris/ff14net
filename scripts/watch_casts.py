@@ -68,7 +68,7 @@ def watch(args: argparse.Namespace) -> int:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Watch direct Deucalion stream for cast-start packets.")
     parser.add_argument("--pid", type=int, help="ffxiv_dx11.exe PID. Auto-detected when omitted.")
-    parser.add_argument("--opcodes", default="data/opcodes.json", type=Path)
+    parser.add_argument("--opcodes", default="data/opcodes/opcodes.json", type=Path)
     parser.add_argument("--actions", default="data/actions.csv", type=Path)
     parser.add_argument("--region", default="Global")
     parser.add_argument("--name", default="ActorCast", help="Server Zone opcode name to print.")
