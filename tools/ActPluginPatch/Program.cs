@@ -1,6 +1,13 @@
 using System.IO.Compression;
 using System.Text;
+using System.Security.Cryptography;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+if (args.Length >= 1 && string.Equals(args[0], "patch-deucalion-757", StringComparison.OrdinalIgnoreCase))
+{
+    return PatchDeucalion757(args.Skip(1).ToArray());
+}
 
 if (args.Length >= 1 && string.Equals(args[0], "dump", StringComparison.OrdinalIgnoreCase))
 {
@@ -20,6 +27,7 @@ if (args.Length < 4)
     Console.WriteLine("  ActPluginPatch patch-file <input-plugin-dll> <output-plugin-dll> <region> <opcode-file.txt>");
     Console.WriteLine(@"  opcode file format: Name|hex, e.g. ActorCast|2af");
     Console.WriteLine("  ActPluginPatch dump <plugin-dll> <region> [Name ...]");
+    Console.WriteLine("  ActPluginPatch patch-deucalion-757 <input-plugin> <output-plugin> <original-deucalion> <output-deucalion>");
     return 1;
 }
 
@@ -166,6 +174,65 @@ static int PatchPlugin(
         Console.WriteLine($"{replacement.Key}={replacement.Value}");
     }
 
+    return 0;
+}
+
+static int PatchDeucalion757(string[] args)
+{
+    if (args.Length != 4)
+        throw new InvalidOperationException("usage: patch-deucalion-757 <input-plugin> <output-plugin> <original-deucalion> <output-deucalion>");
+
+    const string originalHash = "326be4db261064ebb51b8c46d2940f55701d79887e2c65070aff00de4c8c65ef";
+    var inputPlugin = Path.GetFullPath(args[0]);
+    var outputPlugin = Path.GetFullPath(args[1]);
+    var inputNative = Path.GetFullPath(args[2]);
+    var outputNative = Path.GetFullPath(args[3]);
+    if (string.Equals(inputPlugin, outputPlugin, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(inputNative, outputNative, StringComparison.OrdinalIgnoreCase))
+        throw new InvalidOperationException("Use separate output paths to preserve the input DLLs.");
+
+    var native = File.ReadAllBytes(inputNative);
+    if (Convert.ToHexString(SHA256.HashData(native)).ToLowerInvariant() != originalHash)
+        throw new InvalidOperationException("Expected the original Deucalion 1.5.0 DLL; its SHA256 did not match.");
+    var oldPattern = Encoding.ASCII.GetBytes("E8 $ { ' } 4C 8B 4F 10 8B 47 1C 45");
+    var newPattern = Encoding.ASCII.GetBytes("E8 $ { ' } 4C 8B 47 10 44 8B 4F 1C");
+    if (oldPattern.Length != newPattern.Length)
+        throw new InvalidOperationException("Native replacement must preserve byte length.");
+    var offsets = new List<int>();
+    for (var i = 0; i <= native.Length - oldPattern.Length; i++)
+        if (native.AsSpan(i, oldPattern.Length).SequenceEqual(oldPattern))
+            offsets.Add(i);
+    if (offsets.Count != 3)
+        throw new InvalidOperationException($"Expected three signature strings, found {offsets.Count}.");
+    foreach (var offset in offsets)
+        newPattern.CopyTo(native.AsSpan(offset, newPattern.Length));
+    var newHash = SHA256.HashData(native);
+    var oldChecksum = string.Join("-", Convert.FromHexString(originalHash).Select(b => b.ToString("x2")));
+    var newChecksum = string.Join("-", newHash.Select(b => b.ToString("x2")));
+
+    using var outer = ModuleDefinition.ReadModule(inputPlugin);
+    var resource = outer.Resources.OfType<EmbeddedResource>()
+        .Single(r => r.Name == "costura.machina.ffxiv.dll.compressed");
+    using var innerStream = new MemoryStream(Decompress(ReadAllBytes(resource.GetResourceStream())));
+    using var inner = ModuleDefinition.ReadModule(innerStream);
+    var method = inner.GetTypes().Single(t => t.FullName == "Machina.FFXIV.Deucalion.DeucalionInjector")
+        .Methods.Single(m => m.Name == "get__checksum");
+    var checksums = method.Body.Instructions.Where(i => i.OpCode == OpCodes.Ldstr).ToList();
+    if (checksums.Count != 1 || (string)checksums[0].Operand != oldChecksum)
+        throw new InvalidOperationException("Embedded Machina checksum did not match the original Deucalion DLL.");
+    checksums[0].Operand = newChecksum;
+    using var patchedInner = new MemoryStream();
+    inner.Write(patchedInner);
+    outer.Resources.Remove(resource);
+    outer.Resources.Add(new EmbeddedResource(resource.Name, resource.Attributes, Compress(patchedInner.ToArray())));
+    Directory.CreateDirectory(Path.GetDirectoryName(outputPlugin)!);
+    Directory.CreateDirectory(Path.GetDirectoryName(outputNative)!);
+    outer.Write(outputPlugin);
+    File.WriteAllBytes(outputNative, native);
+    Console.WriteLine($"Patched plugin: {outputPlugin}");
+    Console.WriteLine($"Patched Deucalion: {outputNative}");
+    Console.WriteLine($"Native SHA256: {Convert.ToHexString(newHash).ToLowerInvariant()}");
+    Console.WriteLine($"Signature offsets: {string.Join(", ", offsets.Select(i => $"0x{i:x}"))}");
     return 0;
 }
 
