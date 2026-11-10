@@ -2,6 +2,35 @@
 
 Small Python experiments for reading FF14 network data.
 
+## Global 7.57 opcode data
+
+The Global 7.57 table contains the 26 server Zone opcodes supplied by the user
+on 2026-10-20 (replacing the 2026-10-13 mappings). The version label is retained
+until the new game patch version is confirmed. These values have not been verified against live game packets.
+`data/act_global_opcodes.txt` uses ACT names; `data/opcodes.json` uses the
+corresponding upstream names for the Python readers. Other Global messages are
+unknown, and the other regions retain their existing tables.
+
+`data/xivalex_global_opcodes.json` contains the updated server values only.
+It is an incomplete configuration until the 7.57 `C2S_ActionRequest` and
+`C2S_ActionRequestGroundTargeted` values are supplied. The old client values
+were removed because their validity for 7.57 is unknown.
+
+For game build `2026.10.16.0000.0000` and the local ACT 3.0.3.3 input, run
+`pwsh -NoProfile -File tools\repair_deucalion_20261020.ps1` to generate the matching
+ACT/Deucalion bundle in `tools/third_party/patch/`. See
+[the 2026-10-20 repair notes](tools/ActPluginPatch/DEUCALION_20261020.md).
+The ordinary `tools\patch_act_plugin.cmd` updates only opcodes and expects the
+original native DLL checksum; it can undo the checksum pairing of a repaired
+bundle. Updating opcodes does not verify packet layouts or live parsing.
+`tools/update_opcode_data.bat` replaces the local tables with
+upstream data; check the downloaded Global version before using that workflow.
+
+For the Global 7.57 Deucalion `RECV OFF` issue, use
+`tools\repair_deucalion_757.ps1` to generate the matching ACT and Deucalion DLLs.
+See [the repair notes](tools/ActPluginPatch/DEUCALION_757.md) for the exact build,
+backup/install steps, and runtime verification commands.
+
 ## Upstream References
 
 This repo is glue code and local experiments around several upstream projects. It is not a clean-room implementation of every component used here.
