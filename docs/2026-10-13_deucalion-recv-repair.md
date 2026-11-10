@@ -1,8 +1,9 @@
 # Global 7.57 receive hook repair
 
-> **Historical.** Superseded by [DEUCALION_20261020.md](DEUCALION_20261020.md)
+> **Historical.** Superseded by [2026-10-20_deucalion-recv-repair.md](2026-10-20_deucalion-recv-repair.md)
 > for game build `2026.10.16` and ACT 3.0.3.3. The ACT 3.0.3.1 input used
-> below is no longer stored in this repo.
+> below is no longer stored in this repo, and `tools\repair_deucalion_757.ps1`
+> was removed (see git history at `c7adcc4`).
 
 The local game executable is build `2026.10.06.0000.0000`, SHA256
 `b38840761e2677128b6bec1ceaee3f2870cd84e1d38ab7958216373058383780`.
@@ -56,7 +57,7 @@ Close ACT, then install **all three** output files together in its plugin folder
 `deucalion-1.5.0.distrib.dll`. Keep a backup first. Start ACT and run:
 
 ```powershell
-python tools\deucalion_probe.py --seconds 8
+python scripts\deucalion_probe.py --seconds 8
 ```
 
 Exit code 0 means received Zone packets were observed; code 2 means none were

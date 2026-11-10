@@ -55,7 +55,7 @@ pwsh -NoProfile -File tools\repair_deucalion_20261020.ps1
 The script requires the recorded input hashes and three signature matches before
 generating outputs. Its internal `patch-deucalion-757` command name is historical;
 the new wrapper validates the October 16 executable separately. The old
-`repair_deucalion_757.ps1` intentionally remains restricted to its older build.
+`repair_deucalion_757.ps1` was restricted to its older build and has since been removed.
 Previous output files are hash-verified in a timestamped backup under
 `build/20261020-recv-fix/` before replacement.
 
@@ -73,7 +73,7 @@ already loaded in the game; if the old native instance remains active, restart
 the game as well. A fresh-game-process test specifically requires a game restart.
 
 ```powershell
-python tools\deucalion_probe.py --seconds 8 --output captures\deucalion_health_20261020_after.json
+python scripts\deucalion_probe.py --seconds 8 --output captures\deucalion_health_20261020_after.json
 ```
 
 Require actual Zone payloads, no checksum error, and correct ACT damage events

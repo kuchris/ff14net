@@ -36,13 +36,20 @@ Region names accepted by the tool:
 tools\patch_act_plugin.cmd
 ```
 
+The wrapper picks the newest
+`tools\third_party\FFXIV_ACT_Plugin_<version>\FFXIV_ACT_Plugin.dll` as input.
 Default output:
 
 ```text
-tools\third_party\FFXIV_ACT_Plugin_3.0.1.8\FFXIV_ACT_Plugin.patched.dll
+tools\third_party\patch\FFXIV_ACT_Plugin.dll
 ```
 
-The original `FFXIV_ACT_Plugin.dll` is left unchanged.
+The input DLL is left unchanged.
+
+> The wrapper patches opcodes only. If `tools\third_party\patch\` holds a
+> repaired ACT/Deucalion bundle, running it replaces the plugin with one that
+> expects the **original** Deucalion checksum and breaks the pairing. Use
+> `tools\repair_deucalion_20261020.ps1` for the current build instead.
 
 ## Opcode File Format
 
@@ -81,7 +88,7 @@ tools\patch_act_plugin.cmd [opcode-file] [output-dll] [region]
 Example:
 
 ```cmd
-tools\patch_act_plugin.cmd data\act_global_opcodes.txt tools\third_party\FFXIV_ACT_Plugin_3.0.1.8\FFXIV_ACT_Plugin.test.dll Global
+tools\patch_act_plugin.cmd data\act_global_opcodes.txt build\FFXIV_ACT_Plugin.test.dll Global
 ```
 
 ## Direct Tool Usage
@@ -107,6 +114,14 @@ dotnet run --project tools\ActPluginPatch\ActPluginPatch.csproj -- patch-file `
   "C:\path\to\act_global_opcodes.txt"
 ```
 
+Repair the Deucalion receive signature and the embedded checksum. This is used
+by `tools\repair_deucalion_20261020.ps1`; the mode name is historical:
+
+```powershell
+dotnet run --project tools\ActPluginPatch\ActPluginPatch.csproj -- patch-deucalion-757 `
+  <input-plugin> <output-plugin> <original-deucalion> <output-deucalion>
+```
+
 Dump selected values from a plugin:
 
 ```powershell
@@ -128,4 +143,4 @@ The helper depends on `Mono.Cecil` to read and rewrite assembly resources.
 
 - This helper patches an already-built plugin DLL. It does not produce a clean source rebuild of the ACT plugin.
 - If a game patch changes packet structure, updating opcodes alone may not be enough.
-- The wrapper defaults are currently aimed at the plugin copy under `tools\third_party\FFXIV_ACT_Plugin_3.0.1.8`.
+- `patch-deucalion-757` only accepts the original Deucalion 1.5.0 DLL (SHA256 `326be4db…`).
