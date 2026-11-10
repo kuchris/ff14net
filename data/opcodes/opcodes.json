@@ -1,112 +1,112 @@
 [
   {
-    "version": "7.57",
+    "version": "7.58",
     "region": "Global",
     "lists": {
       "ServerZoneIpcType": [
         {
           "name": "StatusEffectList",
-          "opcode": 212
+          "opcode": 349
         },
         {
           "name": "StatusEffectListBozja",
-          "opcode": 903
+          "opcode": 164
         },
         {
           "name": "StatusEffectListPlayer",
-          "opcode": 654
+          "opcode": 861
         },
         {
           "name": "StatusEffectListDouble",
-          "opcode": 332
+          "opcode": 800
         },
         {
           "name": "StatusEffectListOccult",
-          "opcode": 720
+          "opcode": 376
         },
         {
           "name": "Effect",
-          "opcode": 867
+          "opcode": 400
         },
         {
           "name": "AoeEffect8",
-          "opcode": 610
+          "opcode": 563
         },
         {
           "name": "AoeEffect16",
-          "opcode": 665
+          "opcode": 281
         },
         {
           "name": "AoeEffect24",
-          "opcode": 581
+          "opcode": 924
         },
         {
           "name": "AoeEffect32",
-          "opcode": 901
+          "opcode": 221
         },
         {
           "name": "ActorCast",
-          "opcode": 127
+          "opcode": 352
         },
         {
           "name": "EffectResult",
-          "opcode": 812
+          "opcode": 659
         },
         {
           "name": "EffectResultBasic",
-          "opcode": 235
+          "opcode": 586
         },
         {
           "name": "ActorControl",
-          "opcode": 553
+          "opcode": 735
         },
         {
           "name": "ActorControlSelf",
-          "opcode": 257
+          "opcode": 169
         },
         {
           "name": "ActorControlTarget",
-          "opcode": 555
+          "opcode": 256
         },
         {
           "name": "UpdateHpMpTp",
-          "opcode": 676
+          "opcode": 940
         },
         {
           "name": "PlayerSpawn",
-          "opcode": 380
+          "opcode": 764
         },
         {
           "name": "NpcSpawn",
-          "opcode": 381
+          "opcode": 374
         },
         {
           "name": "NpcSpawn2",
-          "opcode": 427
+          "opcode": 765
         },
         {
           "name": "ActorMove",
-          "opcode": 310
+          "opcode": 174
         },
         {
           "name": "ActorSetPos",
-          "opcode": 102
+          "opcode": 934
         },
         {
           "name": "ActorGauge",
-          "opcode": 806
+          "opcode": 803
         },
         {
           "name": "PlaceFieldMarkerPreset",
-          "opcode": 862
+          "opcode": 375
         },
         {
           "name": "PlaceFieldMarker",
-          "opcode": 986
+          "opcode": 233
         },
         {
           "name": "SystemLogMessage",
-          "opcode": 592
+          "opcode": 478
         }
       ],
       "ClientZoneIpcType": [],

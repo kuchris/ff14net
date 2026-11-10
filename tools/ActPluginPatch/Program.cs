@@ -14,6 +14,11 @@ if (args.Length >= 1 && string.Equals(args[0], "dump", StringComparison.OrdinalI
     return Dump(args.Skip(1).ToArray());
 }
 
+if (args.Length >= 1 && string.Equals(args[0], "deucalion-checksum", StringComparison.OrdinalIgnoreCase))
+{
+    return DumpDeucalionChecksum(args.Skip(1).ToArray());
+}
+
 if (args.Length >= 1 && string.Equals(args[0], "patch-file", StringComparison.OrdinalIgnoreCase))
 {
     return PatchFromFile(args.Skip(1).ToArray());
@@ -28,7 +33,28 @@ if (args.Length < 4)
     Console.WriteLine(@"  opcode file format: Name|hex, e.g. ActorCast|2af");
     Console.WriteLine("  ActPluginPatch dump <plugin-dll> <region> [Name ...]");
     Console.WriteLine("  ActPluginPatch patch-deucalion-757 <input-plugin> <output-plugin> <original-deucalion> <output-deucalion>");
+    Console.WriteLine("  ActPluginPatch deucalion-checksum <plugin-dll>   (prints the Deucalion SHA256 the plugin accepts)");
     return 1;
+}
+
+static int DumpDeucalionChecksum(string[] args)
+{
+    if (args.Length != 1)
+        throw new InvalidOperationException("usage: deucalion-checksum <plugin-dll>");
+
+    using var outer = ModuleDefinition.ReadModule(Path.GetFullPath(args[0]));
+    var resource = outer.Resources.OfType<EmbeddedResource>()
+        .Single(r => r.Name == "costura.machina.ffxiv.dll.compressed");
+    using var innerStream = new MemoryStream(Decompress(ReadAllBytes(resource.GetResourceStream())));
+    using var inner = ModuleDefinition.ReadModule(innerStream);
+    var method = inner.GetTypes().Single(t => t.FullName == "Machina.FFXIV.Deucalion.DeucalionInjector")
+        .Methods.Single(m => m.Name == "get__checksum");
+    var checksums = method.Body.Instructions.Where(i => i.OpCode == OpCodes.Ldstr).ToList();
+    if (checksums.Count != 1)
+        throw new InvalidOperationException($"Expected one checksum string, found {checksums.Count}.");
+    // Stored as dash-separated hex bytes; print as a plain lowercase SHA256.
+    Console.WriteLine(((string)checksums[0].Operand).Replace("-", "").ToLowerInvariant());
+    return 0;
 }
 
 var replacements = args

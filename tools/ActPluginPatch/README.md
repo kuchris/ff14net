@@ -46,10 +46,13 @@ tools\third_party\patch\FFXIV_ACT_Plugin.dll
 
 The input DLL is left unchanged.
 
-> The wrapper patches opcodes only. If `tools\third_party\patch\` holds a
-> repaired ACT/Deucalion bundle, running it replaces the plugin with one that
-> expects the **original** Deucalion checksum and breaks the pairing. Use
-> `tools\repair_deucalion_20261020.ps1` for the current build instead.
+> The wrapper patches opcodes only and keeps the plugin's original Deucalion
+> checksum. That is correct for ACT 3.0.3.4 with official Deucalion 1.5.1
+> (the current build; `tools\build_act_bundle_20261103.ps1` does the same with
+> extra checks). It is wrong for the old 3.0.3.3 bundle with a patched
+> Deucalion 1.5.0, where it breaks the checksum pairing.
+> `ActPluginPatch deucalion-checksum <plugin-dll>` shows which Deucalion SHA256
+> a plugin expects.
 
 ## Opcode File Format
 

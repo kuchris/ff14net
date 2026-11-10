@@ -13,12 +13,14 @@ scripts/            Python tools (run from the repo root with uv)
   analyze_deucalion.py decode captured Zone IPC with data/opcodes/opcodes.json
   watch_casts.py      live cast-start viewer
   deucalion_probe.py  short Deucalion health check (RECV ON/OFF, packet count)
+  activate_opcodes.py make one data/opcodes/global/ table the active one
 tools/
   ActPluginPatch/     .NET: patch opcodes / Deucalion checksum in FFXIV_ACT_Plugin.dll
   MachinaBridge/      .NET: Machina decoder bridge and Deucalion injector
   ExportTriggeventActions.java   export data/actions.csv from Triggevent
-  repair_deucalion_20261020.ps1  build the current ACT + Deucalion bundle
-  patch_act_plugin.cmd           opcode-only ACT patch (see warning below)
+  build_act_bundle_20261103.ps1  build the current ACT 3.0.3.4 bundle (7.58)
+  repair_deucalion_20261020.ps1  previous ACT 3.0.3.3 + patched Deucalion bundle (7.57)
+  patch_act_plugin.cmd           opcode-only ACT patch
   update_opcode_data.bat         download upstream opcode tables
   third_party/        ACT plugin inputs and the prepared bundle in patch/
 data/
@@ -33,14 +35,12 @@ build/, captures/   local outputs (git-ignored)
 
 | Item | Value |
 | --- | --- |
-| Game build | `2026.10.16.0000.0000` (patch label 7.57, not reconfirmed) |
-| ACT FFXIV plugin input | 3.0.3.3, stored in `tools/third_party/FFXIV_ACT_Plugin_3.0.3.3/` |
-| Deucalion | 1.5.0 with the patched receive signature |
-| Prepared bundle | `tools/third_party/patch/` (plugin + both Deucalion copies) |
-| Last live check | 2026-10-20: `RECV ON`, ACT type `21` damage events on a training dummy |
-
-`tools/third_party/FFXIV_ACT_Plugin_3.0.3.4.zip` is a newer plugin download
-that has not been extracted, patched or tested yet.
+| Game build | `2026.11.03.0000.0000` (7.58) |
+| ACT FFXIV plugin input | 3.0.3.4, stored in `tools/third_party/FFXIV_ACT_Plugin_3.0.3.4/` |
+| Deucalion | official 1.5.1, unchanged (already matches this build) |
+| Opcodes | community 7.58 table, active since 2026-11-10 |
+| Prepared bundle | `tools/third_party/patch/` (opcode-patched plugin + Deucalion 1.5.1) |
+| Last live check | **not tested on 7.58 yet**; previous build passed on 2026-10-20 |
 
 ## Opcode data
 
@@ -54,15 +54,18 @@ All opcode files live in `data/opcodes/`; see
 | `xivalex_global_opcodes.json` | Global XivAlexander server values |
 | `global/<patch>_<build>.txt` | Every Global table received, one per game build |
 
-- **Global 7.58** (`2026.11.03`): community table stored in
-  `global/7.58_2026.11.03.txt`; not active and not tested yet.
-- **Global 7.57**: only the 26 server Zone opcodes supplied by the user on
-  2026-10-20 (replacing the 2026-10-13 mappings). Other Global messages are
-  unknown. The values match the ACT DLL, but packet layouts have not been
-  checked message by message.
+- **Global 7.58** (`2026.11.03`, active): the 26 server Zone opcodes from the
+  community table. Other Global messages are unknown. Not yet checked against
+  live packets.
+- **Global 7.57**: earlier tables are kept in `global/` for reference.
 - **XivAlexander**: server values only. The config stays incomplete until the
-  7.57 `C2S_ActionRequest` and `C2S_ActionRequestGroundTargeted` values are
-  known; the old client values were removed.
+  `C2S_ActionRequest` and `C2S_ActionRequestGroundTargeted` values are known.
+
+To switch the active Global table to another file in `global/`:
+
+```powershell
+uv run python scripts\activate_opcodes.py data\opcodes\global\7.58_2026.11.03.txt
+```
 - **CN / KR / TW**: taken from the upstream
   [FFXIVOpcodes](https://github.com/karashiiro/FFXIVOpcodes) download
   (CN `7.55a`, KR `7.55h`, TW `7.2`); not checked locally.
@@ -73,25 +76,30 @@ Global version first.
 
 ## ACT / Deucalion repair
 
-Use `tools\repair_deucalion_20261020.ps1` for the current build:
+For the current build (`2026.11.03`), official Deucalion 1.5.1 already hooks
+receive correctly, so only the ACT plugin's opcodes need patching:
 
 ```powershell
-pwsh -NoProfile -File tools\repair_deucalion_20261020.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_act_bundle_20261103.ps1
 ```
 
-It checks the game, plugin and Deucalion input hashes, applies the Global
-opcodes and the receive-signature fix, then writes the matching bundle to
-`tools/third_party/patch/`. Install all three files together; see
-[docs/2026-10-20_deucalion-recv-repair.md](docs/2026-10-20_deucalion-recv-repair.md).
+It checks the game, plugin and Deucalion input hashes and the checksum
+pairing, patches the 7.58 opcodes into ACT 3.0.3.4, and writes the bundle to
+`tools/third_party/patch/`. Only `FFXIV_ACT_Plugin.dll` needs to be installed;
+see [docs/2026-11-10_act-3.0.3.4-global-7.58.md](docs/2026-11-10_act-3.0.3.4-global-7.58.md).
+`ActPluginPatch deucalion-checksum <plugin>` prints the Deucalion SHA256 a
+plugin accepts.
 
-- `tools\patch_act_plugin.cmd` only rewrites opcodes and expects the original
-  Deucalion checksum. Running it on a repaired bundle breaks the
-  plugin/Deucalion checksum pairing. Details in
-  [tools/ActPluginPatch/README.md](tools/ActPluginPatch/README.md).
-- History: the first fix (build `2026.10.06`, ACT 3.0.3.1) is in
-  [docs/2026-10-13_deucalion-recv-repair.md](docs/2026-10-13_deucalion-recv-repair.md)
-  and the full investigation in
-  [docs/2026-10-13_global-7.57-tech-report.md](docs/2026-10-13_global-7.57-tech-report.md).
+History:
+
+- 2026-10-20, build `2026.10.16`, ACT 3.0.3.3: Deucalion 1.5.0 needed a
+  patched receive signature and a matching plugin checksum
+  (`tools\repair_deucalion_20261020.ps1`,
+  [notes](docs/2026-10-20_deucalion-recv-repair.md)). Do not run
+  `tools\patch_act_plugin.cmd` on that bundle; it breaks the checksum pairing.
+- 2026-10-13, build `2026.10.06`, ACT 3.0.3.1: first fix
+  ([notes](docs/2026-10-13_deucalion-recv-repair.md),
+  [full report](docs/2026-10-13_global-7.57-tech-report.md)).
 
 Check the pipe after installing:
 
