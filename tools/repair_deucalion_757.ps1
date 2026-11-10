@@ -3,6 +3,11 @@ param()
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
 $taskSource = Join-Path $taskRoot 'tools\third_party\FFXIV_ACT_Plugin_3.0.3.1'
+# Historical: superseded by repair_deucalion_20261020.ps1. The 3.0.3.1 input is
+# no longer stored in the repo; restore it locally to rerun this script.
+if (!(Test-Path -LiteralPath (Join-Path $taskSource 'FFXIV_ACT_Plugin.dll'))) {
+    throw "Missing ACT 3.0.3.1 input in $taskSource. For the current build use tools\repair_deucalion_20261020.ps1."
+}
 $taskOutput = Join-Path $taskRoot 'tools\third_party\patch'
 $taskStage = Join-Path $taskRoot 'build\757-recv-fix'
 $taskProject = Join-Path $taskRoot 'tools\ActPluginPatch\ActPluginPatch.csproj'

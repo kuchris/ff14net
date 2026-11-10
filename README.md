@@ -2,41 +2,70 @@
 
 Small Python experiments for reading FF14 network data.
 
-## Global 7.57 opcode data
+## Current status (Global)
 
-The Global 7.57 table contains the 26 server Zone opcodes supplied by the user
-on 2026-10-20 (replacing the 2026-10-13 mappings). The version label is retained
-until the new game patch version is confirmed. These values have not been verified against live game packets.
-`data/act_global_opcodes.txt` uses ACT names; `data/opcodes.json` uses the
-corresponding upstream names for the Python readers. Other Global messages are
-unknown, and the other regions retain their existing tables.
+| Item | Value |
+| --- | --- |
+| Game build | `2026.10.16.0000.0000` (patch label 7.57, not reconfirmed) |
+| ACT FFXIV plugin input | 3.0.3.3, stored in `tools/third_party/FFXIV_ACT_Plugin_3.0.3.3/` |
+| Deucalion | 1.5.0 with the patched receive signature |
+| Prepared bundle | `tools/third_party/patch/` (plugin + both Deucalion copies) |
+| Last live check | 2026-10-20: `RECV ON`, ACT type `21` damage events on a training dummy |
 
-`data/xivalex_global_opcodes.json` contains the updated server values only.
-It is an incomplete configuration until the 7.57 `C2S_ActionRequest` and
-`C2S_ActionRequestGroundTargeted` values are supplied. The old client values
-were removed because their validity for 7.57 is unknown.
+`tools/third_party/FFXIV_ACT_Plugin_3.0.3.4.zip` is a newer plugin download
+that has not been extracted, patched or tested yet.
 
-For game build `2026.10.16.0000.0000` and the local ACT 3.0.3.3 input, run
-`pwsh -NoProfile -File tools\repair_deucalion_20261020.ps1` to generate the matching
-ACT/Deucalion bundle in `tools/third_party/patch/`. See
+## Opcode data
+
+| File | Contents |
+| --- | --- |
+| `data/opcodes.json` | Upstream-format table for the Python readers |
+| `data/act_global_opcodes.txt` | Global table with ACT names, `Name\|hex` |
+| `data/xivalex_global_opcodes.json` | Global XivAlexander server values |
+
+- **Global 7.57**: only the 26 server Zone opcodes supplied by the user on
+  2026-10-20 (replacing the 2026-10-13 mappings). Other Global messages are
+  unknown. The values match the ACT DLL, but packet layouts have not been
+  checked message by message.
+- **XivAlexander**: server values only. The config stays incomplete until the
+  7.57 `C2S_ActionRequest` and `C2S_ActionRequestGroundTargeted` values are
+  known; the old client values were removed.
+- **CN / KR / TW**: taken from the upstream
+  [FFXIVOpcodes](https://github.com/karashiiro/FFXIVOpcodes) download
+  (CN `7.55a`, KR `7.55h`, TW `7.2`); not checked locally.
+
+`tools/update_opcode_data.bat` downloads the upstream file and **overwrites all
+three files**, including the hand-entered Global table. Check the upstream
+Global version first.
+
+## ACT / Deucalion repair
+
+Use `tools\repair_deucalion_20261020.ps1` for the current build:
+
+```powershell
+pwsh -NoProfile -File tools\repair_deucalion_20261020.ps1
+```
+
+It checks the game, plugin and Deucalion input hashes, applies the Global
+opcodes and the receive-signature fix, then writes the matching bundle to
+`tools/third_party/patch/`. Install all three files together; see
 [the 2026-10-20 repair notes](tools/ActPluginPatch/DEUCALION_20261020.md).
-The ordinary `tools\patch_act_plugin.cmd` updates only opcodes and expects the
-original native DLL checksum; it can undo the checksum pairing of a repaired
-bundle. Updating opcodes does not verify packet layouts or live parsing.
-`tools/update_opcode_data.bat` replaces the local tables with
-upstream data; check the downloaded Global version before using that workflow.
 
-For the Global 7.57 Deucalion `RECV OFF` issue, use
-`tools\repair_deucalion_757.ps1` to generate the matching ACT and Deucalion DLLs.
-See [the repair notes](tools/ActPluginPatch/DEUCALION_757.md) for the exact build,
-backup/install steps, and runtime verification commands.
+- `tools\patch_act_plugin.cmd` only rewrites opcodes and expects the original
+  Deucalion checksum. Running it on a repaired bundle breaks the
+  plugin/Deucalion checksum pairing.
+- History: `tools\repair_deucalion_757.ps1` and
+  [DEUCALION_757.md](tools/ActPluginPatch/DEUCALION_757.md) cover the first
+  fix for build `2026.10.06` with ACT 3.0.3.1. That ACT input is no longer
+  stored here, so the script is kept for reference only. The full investigation
+  is in [FFXIV_7.57_TECH_REPORT.md](tools/FFXIV_7.57_TECH_REPORT.md).
 
 ## Upstream References
 
 This repo is glue code and local experiments around several upstream projects. It is not a clean-room implementation of every component used here.
 
 - `tools/MachinaBridge` depends on `Machina` and `Machina.FFXIV` for FF14 network decoding.
-- `tools/third_party/deucalion` holds the Deucalion DLL used for the direct pipe workflow.
+- `tools/third_party/patch` holds the patched Deucalion DLL used for the direct pipe workflow. The unpatched 1.5.0 DLL reports `RECV OFF` on the current build.
 - `tools/ActPluginPatch` patches a built `FFXIV_ACT_Plugin.dll` copy by rewriting its embedded opcode table; it does not rebuild the ACT plugin from source.
 - `data/reference/FFXIV_ACT_Plugin.dll_Decompiled` is kept as reference material for investigating the plugin bundle layout and embedded opcode resources.
 
@@ -97,8 +126,12 @@ dotnet run --project tools\MachinaBridge -- --seconds 30 --max-messages 100 --ou
 To test Machina's Deucalion mode:
 
 ```powershell
-dotnet run --project tools\MachinaBridge -- --seconds 30 --max-messages 100 --deucalion --deucalion-path tools\third_party\deucalion --output captures\decoded_messages.jsonl
+dotnet run --project tools\MachinaBridge -- --seconds 30 --max-messages 100 --deucalion --deucalion-path tools\third_party\patch --output captures\decoded_messages.jsonl
 ```
+
+Machina's own injector may check the Deucalion DLL checksum, so it may reject
+the patched DLL in this mode. This has not been tested on the current build.
+`--inject-only` below loads the DLL directly and is the tested path.
 
 ## Step 3: direct Deucalion pipe
 
@@ -107,7 +140,7 @@ The direct path gives more debug information than the Machina wrapper.
 Inject the current Deucalion DLL:
 
 ```powershell
-dotnet run --project tools\MachinaBridge -- --inject-only --deucalion-path tools\third_party\deucalion
+dotnet run --project tools\MachinaBridge -- --inject-only --deucalion-path tools\third_party\patch
 ```
 
 Read Deucalion named-pipe payloads from Python:
@@ -149,7 +182,7 @@ $cp = "tools\third_party\triggevent\xivdata-1.0-SNAPSHOT.jar;$triggevent\deps\sl
 Watch cast-start packets in real time:
 
 ```powershell
-dotnet run --project tools\MachinaBridge -- --inject-only --deucalion-path tools\third_party\deucalion
+dotnet run --project tools\MachinaBridge -- --inject-only --deucalion-path tools\third_party\patch
 uv run python watch_casts.py
 ```
 

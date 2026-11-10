@@ -1,5 +1,9 @@
 # Global 7.57 receive hook repair
 
+> **Historical.** Superseded by [DEUCALION_20261020.md](DEUCALION_20261020.md)
+> for game build `2026.10.16` and ACT 3.0.3.3. The ACT 3.0.3.1 input used
+> below is no longer stored in this repo.
+
 The local game executable is build `2026.10.06.0000.0000`, SHA256
 `b38840761e2677128b6bec1ceaee3f2870cd84e1d38ab7958216373058383780`.
 ACT 3.0.3.1 loads Deucalion 1.5.0. Its session log reports that the default
